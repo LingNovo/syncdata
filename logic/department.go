@@ -2,7 +2,6 @@ package logic
 
 import (
 	"encoding/json"
-	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -158,7 +157,7 @@ func ConvertDepartment(ddr *oapi.DepartmentDetailResponse) (*m.Ding_Department, 
 func GenReoprt() error {
 	org := &m.Sys_Organize{}
 	org.F_Id = guide.SyncCfg.RootOrgId
-	resp, err := org.GetRecord()
+	_, err := org.GetRecord()
 	if err != nil {
 		GetLogEntry().Errorln(err)
 		return err
