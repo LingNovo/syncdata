@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -700,6 +701,8 @@ func (m *Sys_Organize) Sync(table *guide.Table) error {
 				GetLogEntry().Errorln(err)
 				return err
 			}
+			data, _ := json.Marshal(bean)
+			GetLogEntry().Infoln(string(data))
 		}
 		if err := session.Commit(); err != nil {
 			GetLogEntry().Errorln(err)
@@ -708,4 +711,107 @@ func (m *Sys_Organize) Sync(table *guide.Table) error {
 
 	}
 	return nil
+}
+
+func (m *Sys_Organize) GetRecord() (*guide.Record, error) {
+	session := guide.GetDB().NewSession()
+	defer session.Close()
+	cond := &Sys_Organize{}
+	cond.F_Id = m.F_Id
+	ok, err := session.Get(cond)
+	if err != nil {
+		GetLogEntry().Errorln(err)
+		return nil, err
+	}
+	if !ok {
+		return nil, nil
+	}
+	if cond.F_UnionId == 0 {
+		data_json, _ := json.Marshal(&guide.Record{
+			Id:       cond.F_Id,
+			Name:     cond.F_FullName,
+			FullName: cond.F_ShortName,
+		})
+		guide.Logger.Infof("Sys_Organize:%s", string(data_json))
+	}
+	resp := &guide.Record{}
+	resp.Id = cond.F_Id
+	resp.Name = cond.F_FullName
+	resp.FullName = cond.F_ShortName
+	resp_target_cond := &Ding_Department{}
+	resp_target_cond.Id = cond.F_UnionId
+	ok, err = session.Get(resp_target_cond)
+	if err != nil {
+		GetLogEntry().Errorln(err)
+		return nil, err
+	}
+	resp.IsValid = ok
+	if !ok || len(strings.TrimSpace(resp.FullName)) == 0 {
+		data_json, _ := json.Marshal(&guide.Record{
+			Id:       resp.Id,
+			Name:     resp.Name,
+			FullName: resp.FullName,
+		})
+		guide.Logger.Infof("Sys_Organize :%s", string(data_json))
+	}
+	data_cond := &Sys_User{}
+	data_cond.F_DepartmentId = resp.Id
+	data_array := make([]*Sys_User, 0)
+	if err := session.Find(&data_array, data_cond); err != nil {
+		GetLogEntry().Errorln(err)
+		return nil, err
+	}
+	if len(data_array) > 0 {
+		resp.Data = make([]*guide.Record, 0)
+		for _, data := range data_array {
+			if len(strings.TrimSpace(data.F_UnionId)) == 0 {
+				data_json, _ := json.Marshal(&guide.Record{
+					Id:       data.F_Id,
+					Name:     data.F_RealName,
+					FullName: data.F_DeptShortName + "-" + data.F_RealName,
+				})
+				guide.Logger.Infof("Sys_User :%s", string(data_json))
+			}
+			data_target_cond := &Ding_User{}
+			data_target_cond.Unionid = data.F_UnionId
+			ok, err := session.Get(data_target_cond)
+			if err != nil {
+				GetLogEntry().Errorln(err)
+				return nil, err
+			}
+			data_info := &guide.Record{}
+			data_info.Id = data.F_UnionId
+			data_info.Name = data.F_RealName
+			data_info.FullName = data.F_DeptShortName + "-" + data.F_RealName
+			data_info.IsValid = ok
+			resp.Data = append(resp.Data, data_info)
+			if !ok {
+				data_json, _ := json.Marshal(&guide.Record{
+					Id:       data_info.Id,
+					Name:     data_info.Name,
+					FullName: data_info.FullName,
+				})
+				guide.Logger.Infof("Sys_User :%s", string(data_json))
+			}
+		}
+	}
+	child_cond := &Sys_Organize{}
+	child_cond.F_ParentId = resp.Id
+	child_array := make([]*Sys_Organize, 0)
+	if err := session.Find(&child_array, child_cond); err != nil {
+		GetLogEntry().Errorln(err)
+		return nil, err
+	}
+	if len(child_array) > 0 {
+		resp.Itmes = make([]*guide.Record, 0)
+		for _, item := range child_array {
+			child, err := item.GetRecord()
+			if err != nil {
+				GetLogEntry().Errorln(err)
+				return nil, err
+			}
+			resp.Itmes = append(resp.Itmes, child)
+		}
+	}
+	return resp, nil
 }

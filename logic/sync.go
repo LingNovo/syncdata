@@ -42,6 +42,12 @@ type SyncProcessor interface {
 	Sync(table *guide.Table) error
 }
 
+// 生成报表
+type GenReporter interface {
+	//获取记录
+	GetRecord() (*guide.Record, error)
+}
+
 // 数据同步处理对象集合
 var syncProcess = map[string]SyncProcessor{
 	"Sys_User":      new(m.Sys_User),

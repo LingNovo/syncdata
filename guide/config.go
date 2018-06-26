@@ -17,6 +17,8 @@ type SyncConfig struct {
 	IsPullData bool `xml:"IsPullData,attr"`
 	// 是否从缓存表同步数据
 	IsSyncData bool `xml:"IsSyncData,attr"`
+	// 是否记录数据同步对比
+	IsRecord bool `xml:"IsRecord,attr"`
 	// 数据表集合
 	Tables []Table `xml:"Table"`
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<SyncConfig RootOrgId="eb75d4e4-355a-434b-b7dd-fe7f98d30128" IsPaddingDept="false" IsSyncTable="false" IsPullData = "false"  IsSyncData="true">
+<SyncConfig RootOrgId="eb75d4e4-355a-434b-b7dd-fe7f98d30128" IsPaddingDept="false" IsSyncTable="false" IsPullData = "false"  IsSyncData="true" IsRecord="true">
   <Table Source="Ding_Department" Target="Sys_Organize" IsClear = "false" IsBackUp="false">
       <Column Source="Id" Target="F_UnionId"></Column>
       <Column Source="Name" Target="F_FullName"></Column>

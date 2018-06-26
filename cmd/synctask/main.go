@@ -59,6 +59,14 @@ func main() {
 		// 根据缓存表与目标表配置信息同步数据
 		if err := logic.SyncDataByConfig(&guide.SyncCfg); err != nil {
 			logic.GetLogEntry().Errorln(err)
+			return
+		}
+	}
+	if guide.SyncCfg.IsRecord {
+		// 同步记录
+		if err := logic.GenReoprt(); err != nil {
+			logic.GetLogEntry().Errorln(err)
+			return
 		}
 	}
 }
