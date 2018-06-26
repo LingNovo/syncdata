@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -896,8 +895,6 @@ func (m *Sys_User) Sync(table *guide.Table) error {
 				GetLogEntry().Errorln(err)
 				return err
 			}
-			data, _ := json.Marshal(bean)
-			GetLogEntry().Infoln(string(data))
 		}
 		if err := session.Commit(); err != nil {
 			GetLogEntry().Errorln(err)

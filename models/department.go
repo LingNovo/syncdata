@@ -701,8 +701,6 @@ func (m *Sys_Organize) Sync(table *guide.Table) error {
 				GetLogEntry().Errorln(err)
 				return err
 			}
-			data, _ := json.Marshal(bean)
-			GetLogEntry().Infoln(string(data))
 		}
 		if err := session.Commit(); err != nil {
 			GetLogEntry().Errorln(err)
